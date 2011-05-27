@@ -22,32 +22,24 @@ module SlightAssets
     end
     module_function :write_static_gzipped_file
 
-    begin
-      require "yui/compressor"
-      def write_static_minified_asset(file_path)
-        return file_path if file_path.nil? || file_path =~ /\.min\./ || file_path !~ /\.(?:js|css)\z/ || ! File.exists?(file_path)
-        min_path = file_path.gsub(/\.(js|css)\z/, '.min.\1')
-        case extension = $1
-        when "css"
-          compressor = YUI::CssCompressor.new
-        when "js"
-          compressor = js_compressor
-        else
-          return file_path
-        end
-        content = File.read(file_path)
-        content = compressor.compress(content)
-        content = yield(extension, content) || content if block_given?
-        File.open(min_path, "w") { |f| f.write(content) }
-        mt = File.mtime(file_path)
-        File.utime(mt, mt, min_path)
-        min_path
+    def write_static_minified_asset(file_path)
+      return file_path if file_path.nil? || file_path =~ /\.min\./ || file_path !~ /\.(?:js|css)\z/ || ! File.exists?(file_path)
+      min_path = file_path.gsub(/\.(js|css)\z/, '.min.\1')
+      compressor = nil
+      case extension = $1
+      when "css"
+        compressor = yui_css_compressor
+      when "js"
+        compressor = js_processor
       end
-    rescue LoadError => e
-      STDERR.puts "WARN: #{e.message}"
-      def write_static_minified_asset(file_path)
-        file_path
-      end
+      return file_path if compressor.nil?
+      content = File.read(file_path)
+      content = compressor.compress(content)
+      content = yield(extension, content) || content if block_given?
+      File.open(min_path, "w") { |f| f.write(content) }
+      mt = File.mtime(file_path)
+      File.utime(mt, mt, min_path)
+      min_path
     end
     module_function :write_static_minified_asset
 
@@ -68,17 +60,39 @@ module SlightAssets
 
     private
 
+    def js_processor
+      closure_compiler_js_compressor || yui_js_compressor
+    end
+    module_function :js_processor
+
     begin
       require "closure-compiler"
-      def js_compressor
+      def closure_compiler_js_compressor
         Closure::Compiler.new
       end
     rescue LoadError => e
       STDERR.puts "WARN: #{e.message}"
-      def js_compressor
-        YUI::JavaScriptCompressor.new
+      def closure_compiler_js_compressor
       end
     end
-    module_function :js_compressor
+    module_function :closure_compiler_js_compressor
+
+    begin
+      require "yui/compressor"
+      def yui_js_compressor
+        YUI::JavaScriptCompressor.new
+      end
+      def yui_css_compressor
+        YUI::CssCompressor.new
+      end
+    rescue LoadError => e
+      STDERR.puts "WARN: #{e.message}"
+      def yui_js_compressor
+      end
+      def yui_css_compressor
+      end
+    end
+    module_function :yui_js_compressor
+    module_function :yui_css_compressor
   end
 end
