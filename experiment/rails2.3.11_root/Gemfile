@@ -1,0 +1,8 @@
+source :rubygems
+
+gem "rails", "= 2.3.11"
+gem "yui-compressor", :require => "yui/compressor"
+gem "closure-compiler"
+group :test do
+  gem "ruby-debug"
+end
