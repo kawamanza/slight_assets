@@ -28,5 +28,23 @@ describe "SlightAssets::Util" do
       File.should be_exists(min_path)
       File.delete(min_path)
     end
+    it "all files asynchronously" do
+      min_path = @file_path.gsub(/\.(js|css)\z/, '.min.\1')
+      zip_path = "#{min_path}.gz"
+      lock_file_path = "#{@file_path}.locked"
+
+      File.delete(min_path) if File.exists?(min_path)
+      File.delete(zip_path) if File.exists?(zip_path)
+      File.should_not be_exists(min_path)
+      File.should_not be_exists(zip_path)
+
+      SlightAssets::Util.async_write_static_compressed_file(@file_path)
+      while File.exists?(lock_file_path); end
+
+      File.should be_exists(min_path)
+      File.should be_exists(zip_path)
+      File.delete(min_path)
+      File.delete(zip_path)
+    end
   end
 end
