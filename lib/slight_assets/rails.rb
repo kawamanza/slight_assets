@@ -1,3 +1,8 @@
+module SlightAssets
+  module Rails
+  end
+end
+
 require "action_view"
 
 module ActionView
