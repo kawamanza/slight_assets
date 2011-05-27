@@ -58,7 +58,7 @@ module SlightAssets
     end
     module_function :async_write_static_compressed_file
 
-    private
+    protected
 
     def js_processor
       closure_compiler_js_compressor || yui_js_compressor
