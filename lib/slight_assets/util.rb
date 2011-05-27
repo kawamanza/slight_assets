@@ -31,7 +31,7 @@ module SlightAssets
         when "css"
           compressor = YUI::CssCompressor.new
         when "js"
-          compressor = YUI::JavaScriptCompressor.new
+          compressor = js_compressor
         else
           return file_path
         end
@@ -56,5 +56,20 @@ module SlightAssets
       end
     end
     module_function :async_write_static_compressed_file
+
+    private
+
+    begin
+      require "closure-compiler"
+      def js_compressor
+        Closure::Compiler.new
+      end
+    rescue LoadError => e
+      STDERR.puts "WARN: #{e.message}"
+      def js_compressor
+        YUI::JavaScriptCompressor.new
+      end
+    end
+    module_function :js_compressor
   end
 end
