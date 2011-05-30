@@ -1,3 +1,5 @@
+slight_assets_lib = File.expand_path(File.join(*%w[.. .. .. .. lib]), __FILE__)
+$:.unshift(slight_assets_lib) unless $:.include?(slight_assets_lib)
 begin
   require "rubygems"
   require "bundler"
