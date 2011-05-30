@@ -1,4 +1,6 @@
 Gemfile.lock
 *.log
+*.min.css
+*.css.gz
 *.min.js
 *.js.gz

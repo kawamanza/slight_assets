@@ -10,6 +10,7 @@ module SlightAssets
         base.class_eval do
           alias_method_chain :write_asset_file_contents, :static_compressed_file
           alias_method_chain :javascript_src_tag, :static_compressed_file
+          alias_method_chain :stylesheet_tag, :static_compressed_file
         end
       end
 
@@ -36,6 +37,22 @@ module SlightAssets
           end
         end
         javascript_src_tag_without_static_compressed_file(source, options)
+      end
+
+      def stylesheet_tag_with_static_compressed_file(source, options)
+        unless source =~ /\A(?:\w+:)?\/\//
+          asset_path = path_to_stylesheet(source).split('?').first
+          file_path = asset_file_path(asset_path)
+          if asset_path.end_with?(".css") && asset_path !~ /\.min\./ && ::File.exists?(file_path)
+            compressed_path = asset_path.gsub(/\.css\z/, '.min.css')
+            if ::File.exists?(asset_file_path(compressed_path))
+              source = compressed_path unless ::File.exists?("#{file_path}.locked")
+            else
+              SlightAssets::Util.async_write_static_compressed_file(file_path)
+            end
+          end
+        end
+        stylesheet_tag_without_static_compressed_file(source, options)
       end
     end
   end
