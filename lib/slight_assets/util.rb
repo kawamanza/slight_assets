@@ -43,20 +43,25 @@ module SlightAssets
     end
     module_function :write_static_minified_asset
 
-    def async_write_static_compressed_file(file_path)
+    def async_write_static_compressed_file(file_path, &block)
       lock_file_path = "#{file_path}.locked"
       return if File.exists?(lock_file_path) && File.mtime(lock_file_path) > (Time.now - 120)
       File.open(lock_file_path, "w"){}  # touch
       Thread.new do
         begin
-          file_path = write_static_minified_asset(file_path) { |extension, content| content }
-          file_path = write_static_gzipped_file(file_path)
+          file_path = write_static_compressed_file(file_path) { |extension, content| content }
         ensure
           File.delete(lock_file_path)
         end
       end
     end
     module_function :async_write_static_compressed_file
+
+    def write_static_compressed_file(file_path, &block)
+      file_path = write_static_minified_asset(file_path, &block)
+      file_path = write_static_gzipped_file(file_path)
+    end
+    module_function :write_static_compressed_file
 
     protected
 
