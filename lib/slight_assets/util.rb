@@ -28,9 +28,9 @@ module SlightAssets
       compressor = nil
       case extension = $1
       when "css"
-        compressor = yui_css_compressor
+        compressor = css_compressor
       when "js"
-        compressor = js_processor
+        compressor = js_compressor
       end
       return file_path if compressor.nil?
       content = File.read(file_path)
@@ -63,12 +63,17 @@ module SlightAssets
     end
     module_function :write_static_compressed_file
 
-    protected
-
-    def js_processor
+    def js_compressor
       closure_compiler_js_compressor || yui_js_compressor
     end
-    module_function :js_processor
+    module_function :js_compressor
+
+    def css_compressor
+      yui_css_compressor
+    end
+    module_function :css_compressor
+
+    protected
 
     begin
       require "closure-compiler"
