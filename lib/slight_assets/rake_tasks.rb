@@ -10,9 +10,9 @@ namespace :asset do
         puts "WARN: No JS compressor was found"
         exit 1
       end
-      jslist = FileList['public/javascripts/**/*.js'].select{|file| ! ( file =~ /\.min\.js$/ || File.exists?(file.gsub(/\.js$/, '.min.js')) ) }
+      jslist = FileList[File.join(Rails.root, *%w(public javascripts ** *.js))].select{|file| ! ( file =~ /\.min\.js$/ || File.exists?(file.gsub(/\.js$/, '.min.js')) ) }
       jslist.each do |jsfile|
-        puts "Compressing #{jsfile}"
+        puts "Compressing #{jsfile[(Rails.root.to_s.size+1)..-1]}"
         minfile = SlightAssets::Util.write_static_compressed_file(jsfile).chomp(".gz")
         jssize = File.size(jsfile)
         minsize = File.size(minfile)
