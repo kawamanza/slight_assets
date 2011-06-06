@@ -40,4 +40,7 @@ namespace :asset do
       puts "Total: #{csslist.size} CSS files were compressed" if csslist.any?
     end
   end
+
+  desc "Compress all JS and CSS files from your Rails application"
+  task :compress => ["compress:js", "compress:css"]
 end
