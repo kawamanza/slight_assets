@@ -6,6 +6,33 @@ describe "SlightAssets::Util" do
     SlightAssets::Util.should respond_to(:write_static_minified_asset)
     SlightAssets::Util.should respond_to(:async_write_static_compressed_file)
   end
+
+  context "checking image mime types" do
+    {
+      ".gif" => "image/gif",
+      ".jpg" => "image/jpeg",
+      ".jpeg" => "image/jpeg",
+      ".tif" => "image/tiff",
+      ".tiff" => "image/tiff"
+    }.each_pair do |extension, mime_type|
+      it "should identify files ended with '#{extension}' as '#{mime_type}'" do
+        SlightAssets::Util.image_mime_type("file#{extension}").should be == mime_type
+      end
+    end
+  end
+
+  context "converting css" do
+    it "should embed images" do
+      file_path = File.expand_path(File.join(*%w[.. .. fixtures rails.css]), __FILE__)
+      content = File.read(file_path)
+      embed_content = SlightAssets::Util.embed_images(content, file_path)
+      embed_content.should_not be == content
+      content.should_not =~ /url\("?data:image\/png;charset=utf-8;base64,/
+      content.should =~ /url\("invalid.jpg"\)/
+      embed_content.should =~ /url\("?data:image\/png;charset=utf-8;base64,/
+    end
+  end
+
   context "writing" do
     before do
       @file_path = File.expand_path(File.join(*%w[.. .. fixtures fixture.js]), __FILE__)

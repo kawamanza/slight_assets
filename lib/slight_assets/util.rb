@@ -35,7 +35,7 @@ module SlightAssets
       return file_path if compressor.nil?
       content = File.read(file_path)
       content = compressor.compress(content)
-      content = yield(extension, content) || content if block_given?
+      content = embed_images(content, file_path) if extension == "css"
       File.open(min_path, "w") { |f| f.write(content) }
       mt = File.mtime(file_path)
       File.utime(mt, mt, min_path)
@@ -43,13 +43,61 @@ module SlightAssets
     end
     module_function :write_static_minified_asset
 
+    def embed_images(content, file_path)
+      return content if file_path =~ /\A(?:\w+:)?\/\//
+      content.gsub(/url\(['"]?(.*?)(?:\?\d+)?['"]?\)/) do |url_match|
+        image_path = $1
+        if image_path =~ /\A(?:[\\\/]|\w+:)/
+          url_match
+        else
+          image_file_path = File.expand_path(File.join("..", image_path), file_path)
+          if (mt = image_mime_type(image_path)) &&
+             (encode64 = encoded_file_contents(image_file_path))
+            c = "url(\"data:#{mt};charset=utf-8;base64,#{encode64}\")"
+          else
+            url_match
+          end
+        end
+      end
+    end
+    module_function :embed_images
+
+    def image_mime_type(path)
+      return if path !~ /\.([^\.]+)$/
+      case $1.downcase.to_sym
+      when :jpg, :jpeg
+        "image/jpeg"
+      when :png
+        "image/png"
+      when :gif
+        "image/gif"
+      when :tif, :tiff
+        "image/tiff"
+      end
+    end
+    module_function :image_mime_type
+
+    begin
+      require "base64"
+      def encoded_file_contents(file_path)
+        minimum_image_weight = 40 * 1_024 # TODO: use minimum_image_weight as external setting
+        if File.exists?(file_path) && File.size(file_path) <= minimum_image_weight
+          Base64.encode64(File.read(file_path)).gsub(/\n/, "")
+        end
+      end
+    rescue LoadError
+      def encoded_file_contents(file_path)
+      end
+    end
+    module_function :encoded_file_contents
+
     def async_write_static_compressed_file(file_path, &block)
       lock_file_path = "#{file_path}.locked"
       return if File.exists?(lock_file_path) && File.mtime(lock_file_path) > (Time.now - 120)
       File.open(lock_file_path, "w"){}  # touch
       Thread.new do
         begin
-          file_path = write_static_compressed_file(file_path) { |extension, content| content }
+          file_path = write_static_compressed_file(file_path)
         ensure
           File.delete(lock_file_path)
         end
@@ -57,8 +105,8 @@ module SlightAssets
     end
     module_function :async_write_static_compressed_file
 
-    def write_static_compressed_file(file_path, &block)
-      file_path = write_static_minified_asset(file_path, &block)
+    def write_static_compressed_file(file_path)
+      file_path = write_static_minified_asset(file_path)
       file_path = write_static_gzipped_file(file_path)
     end
     module_function :write_static_compressed_file
