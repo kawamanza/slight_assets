@@ -27,9 +27,9 @@ describe "SlightAssets::Util" do
       content = File.read(file_path)
       embed_content = SlightAssets::Util.embed_images(content, file_path)
       embed_content.should_not be == content
-      content.should_not =~ /url\("?data:image\/png;charset=utf-8;base64,/
+      content.should_not =~ /url\("?data:image\/png;base64,/
       content.should =~ /url\("invalid.jpg"\)/
-      embed_content.should =~ /url\("?data:image\/png;charset=utf-8;base64,/
+      embed_content.should =~ /url\("?data:image\/png;base64,/
     end
   end
 

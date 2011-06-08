@@ -53,7 +53,7 @@ module SlightAssets
           image_file_path = File.expand_path(File.join("..", image_path), file_path)
           if (mt = image_mime_type(image_path)) &&
              (encode64 = encoded_file_contents(image_file_path))
-            c = "url(\"data:#{mt};charset=utf-8;base64,#{encode64}\")"
+            c = "url(\"data:#{mt};base64,#{encode64}\")"
           else
             url_match
           end
@@ -80,8 +80,8 @@ module SlightAssets
     begin
       require "base64"
       def encoded_file_contents(file_path)
-        minimum_image_weight = 40 * 1_024 # TODO: use minimum_image_weight as external setting
-        if File.exists?(file_path) && File.size(file_path) <= minimum_image_weight
+        maximum_file_size = 40 * 1_024 # TODO: use maximum_file_size as external setting
+        if File.exists?(file_path) && File.size(file_path) <= maximum_file_size
           Base64.encode64(File.read(file_path)).gsub(/\n/, "")
         end
       end
