@@ -35,7 +35,7 @@ module SlightAssets
       return file_path if compressor.nil?
       content = File.read(file_path)
       content = compressor.compress(content)
-      content = embed_images(content, file_path) if extension == "css"
+      content = embed_images(content, min_path) if extension == "css"
       File.open(min_path, "w") { |f| f.write(content) }
       mt = File.mtime(file_path)
       File.utime(mt, mt, min_path)
@@ -45,15 +45,25 @@ module SlightAssets
 
     def embed_images(content, file_path)
       return content if file_path =~ /\A(?:\w+:)?\/\//
-      content.gsub(/url\(['"]?(.*?)(?:\?\d+)?['"]?\)/) do |url_match|
+      images = extract_images(content, file_path)
+      files = {}
+      content = content.gsub(Cfg.url_matcher) do |url_match|
         image_path = $1
         if image_path =~ /\A(?:[\\\/]|\w+:)/
           url_match
         else
           image_file_path = File.expand_path(File.join("..", image_path), file_path)
+          encode64 = files[image_file_path]
           if (mt = image_mime_type(image_path)) &&
-             (encode64 = encoded_file_contents(image_file_path))
-            c = "url(\"data:#{mt};base64,#{encode64}\")"
+             (encode64 ||= encoded_file_contents(image_file_path))
+            if images[image_file_path] > 1
+              if files[image_file_path].nil?
+                files[image_file_path] = encode64
+              end
+              url_match
+            else
+              "url(\"data:#{mt};base64,#{encode64}\")"
+            end
           else
             url_match
           end
@@ -61,6 +71,16 @@ module SlightAssets
       end
     end
     module_function :embed_images
+
+    def extract_images(content, file_path)
+      images = {}
+      content.scan(Cfg.url_matcher).flatten.each do |image_path|
+        image_file_path = File.expand_path(File.join("..", image_path), file_path)
+        images[image_file_path] = (images[image_file_path] || 0) + 1
+      end
+      images
+    end
+    module_function :extract_images
 
     def image_mime_type(path)
       return if path !~ /\.([^\.]+)$/
@@ -80,8 +100,7 @@ module SlightAssets
     begin
       require "base64"
       def encoded_file_contents(file_path)
-        maximum_file_size = 40 * 1_024 # TODO: use maximum_file_size as external setting
-        if File.exists?(file_path) && File.size(file_path) <= maximum_file_size
+        if File.exists?(file_path) && File.size(file_path) <= Cfg.maximum_embedded_file_size
           Base64.encode64(File.read(file_path)).gsub(/\n/, "")
         end
       end
