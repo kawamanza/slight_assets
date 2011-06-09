@@ -22,14 +22,28 @@ describe "SlightAssets::Util" do
   end
 
   context "converting css" do
-    it "should embed images" do
+    it "should embed images, except those that do not exist" do
       file_path = File.expand_path(File.join(*%w[.. .. fixtures rails.css]), __FILE__)
       content = File.read(file_path)
       embed_content = SlightAssets::Util.embed_images(content, file_path)
       embed_content.should_not be == content
       content.should_not =~ /url\("?data:image\/png;base64,/
       content.should =~ /url\("invalid.jpg"\)/
+      embed_content.should =~ /url\("invalid.jpg"\)/
       embed_content.should =~ /url\("?data:image\/png;base64,/
+    end
+    it "should embed images when it was referenced once" do
+      file_path = File.expand_path(File.join(*%w[.. .. fixtures once.css]), __FILE__)
+      content = File.read(file_path)
+      embed_content = SlightAssets::Util.embed_images(content, file_path)
+      embed_content.should_not be == content
+      embed_content.should =~ /url\("?data:image\/png;base64,/
+    end
+    it "should not embed images when it was referenced twice or more" do
+      file_path = File.expand_path(File.join(*%w[.. .. fixtures twice.css]), __FILE__)
+      content = File.read(file_path)
+      embed_content = SlightAssets::Util.embed_images(content, file_path)
+      embed_content.should be == content
     end
   end
 

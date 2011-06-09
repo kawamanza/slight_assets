@@ -1,0 +1,7 @@
+body {
+    font-height: 100%;
+}
+.ui-icon-1 {
+    background-image: url(ui-icons.png);
+    background-position: 0 0;
+}
