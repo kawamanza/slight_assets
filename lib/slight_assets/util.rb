@@ -1,3 +1,5 @@
+require "base64"
+
 module SlightAssets
   module Util
     begin
@@ -97,15 +99,9 @@ module SlightAssets
     end
     module_function :image_mime_type
 
-    begin
-      require "base64"
-      def encoded_file_contents(file_path)
-        if File.exists?(file_path) && File.size(file_path) <= Cfg.maximum_embedded_file_size
-          Base64.encode64(File.read(file_path)).gsub(/\n/, "")
-        end
-      end
-    rescue LoadError
-      def encoded_file_contents(file_path)
+    def encoded_file_contents(file_path)
+      if File.exists?(file_path) && File.size(file_path) <= Cfg.maximum_embedded_file_size
+        Base64.encode64(File.read(file_path)).gsub(/\n/, "")
       end
     end
     module_function :encoded_file_contents
