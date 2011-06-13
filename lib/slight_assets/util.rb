@@ -48,21 +48,37 @@ module SlightAssets
     def embed_images(content, file_path)
       return content if file_path =~ /\A(?:\w+:)?\/\//
       images = extract_images(content, file_path)
-      files = {}
+      file_url = asset_url(file_path)
+      image_contents = {}
+      multipart = ["/*\r\nContent-Type: multipart/related; boundary=\"MHTML_IMAGES\"\r\n"]
       content = content.gsub(Cfg.url_matcher) do |url_match|
         image_path = $1
         if image_path =~ /\A(?:[\\\/]|\w+:)/
           url_match
         else
           image_file_path = File.expand_path(File.join("..", image_path), file_path)
-          encode64 = files[image_file_path]
           if (mt = image_mime_type(image_path)) &&
-             (encode64 ||= encoded_file_contents(image_file_path))
+             (encode64 = image_contents[image_file_path] || encoded_file_contents(image_file_path))
+            if image_contents[image_file_path].nil?
+              part_name = "img#{multipart.size}_#{File.basename(image_file_path)}"
+              image_contents[image_file_path] = [part_name, encode64]
+            end
+            part_name, encode64 = image_contents[image_file_path]
             if images[image_file_path] > 1
-              if files[image_file_path].nil?
-                files[image_file_path] = encode64
+              if file_url
+                multipart << [
+                  "\r\n--MHTML_IMAGES",
+                  "\r\nContent-Location: ",
+                  part_name,
+                  "\r\nContent-Type: ",
+                  mt,
+                  "\r\nContent-Transfer-Encoding: base64\r\n\r\n",
+                  encode64
+                ]
+                "url(mhtml:#{file_url}!#{part_name})"
+              else
+                url_match
               end
-              url_match
             else
               "url(\"data:#{mt};base64,#{encode64}\")"
             end
@@ -71,8 +87,21 @@ module SlightAssets
           end
         end
       end
+      if multipart.size > 1
+        content = content.gsub(/(\*?)(background-image:[^;\}]*?url\("?mhtml)/, '*\2')
+        (multipart + ["\r\n--MHTML_IMAGES--\r\n*/\r\n", content]).flatten.join("")
+      else
+        content
+      end
     end
     module_function :embed_images
+
+    def asset_url(file_path)
+      if defined?(::Rails) && file_path.start_with?(::Rails.public_path) && Cfg.mhtml_base_href?
+        URI.join(Cfg.mhtml_base_href, file_path[(::Rails.public_path.size)..-1])
+      end
+    end
+    module_function :asset_url
 
     def extract_images(content, file_path)
       images = {}

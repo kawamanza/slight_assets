@@ -2,14 +2,22 @@ require "yaml"
 
 module SlightAssets
   class Config
+    attr_reader :config
     def initialize
       @config = {}
     end
 
     def method_missing(name, *args)
       sname = name.to_s
-      return @config[sname] if @config.has_key?(sname)
-      super
+      case sname
+      when /\?$/
+        @config[$`]
+      when /\=$/
+        @config[$`] = args.first
+      else
+        return @config[sname] if @config.has_key?(sname)
+        super
+      end
     end
 
     def load_config(path)

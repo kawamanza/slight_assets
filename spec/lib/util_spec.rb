@@ -39,6 +39,15 @@ describe "SlightAssets::Util" do
       embed_content.should_not be == content
       embed_content.should =~ /url\("?data:image\/png;base64,/
     end
+    it "should embed images when it was referenced twice or more" do
+      file_path = File.expand_path(File.join(*%w[.. .. fixtures twice.css]), __FILE__)
+      content = File.read(file_path)
+      SlightAssets::Util.stubs(:asset_url).with(any_parameters).returns("http://example.com/stylesheets/twice.css")
+      embed_content = SlightAssets::Util.embed_images(content, file_path)
+      embed_content.should_not be == content
+      embed_content.should =~ /multipart\/related/
+      embed_content.should =~ /\*background-image:\s*url\("?mhtml:http:\/\/example.com/
+    end
     it "should not embed images when it was referenced twice or more" do
       file_path = File.expand_path(File.join(*%w[.. .. fixtures twice.css]), __FILE__)
       content = File.read(file_path)
