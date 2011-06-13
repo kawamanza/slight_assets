@@ -49,9 +49,10 @@ namespace :asset do
       if writer.image_report.any?
         puts "=" * 80
         writer.image_report.each_pair do |image_file, report|
-          puts "Image: " + image_file[(Rails.public_path.size)..-1]
+          refs = report[:found_in].size
+          puts "Image: #{image_file[(Rails.public_path.size)..-1]} (#{"\033[1;31m" unless refs == 1}#{refs} occurrence#{"s" unless refs == 1}\033[0m)"
           report[:found_in].each_pair do |css_file, count|
-            mode = report[:exists] ? (report[:embeddable] && count == 1 ? "embedded" : "not embedded") : "not found"
+            mode = report[:exists] ? (report[:embeddable] && count == 1 ? "embedded" : "\033[0;33mnot embedded\033[0m") : "\033[0;31mnot found\033[0m"
             puts "  found in #{css_file[(Rails.public_path.size)..-1]} (#{count} ref#{"s" unless count == 1}, #{mode})"
           end
         end
