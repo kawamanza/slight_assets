@@ -58,12 +58,13 @@ module SlightAssets
         else
           image_file_path = File.expand_path(File.join("..", image_path), file_path)
           if (mt = image_mime_type(image_path)) &&
-             (encode64 = image_contents[image_file_path] || encoded_file_contents(image_file_path))
+             (encode64 = encoded_file_contents(image_file_path, file_path))
             if image_contents[image_file_path].nil?
               part_name = "img#{multipart.size}_#{File.basename(image_file_path)}"
               image_contents[image_file_path] = [part_name, encode64]
+            else
+              part_name = image_contents[image_file_path].first
             end
-            part_name, encode64 = image_contents[image_file_path]
             if images[image_file_path] > 1
               if file_url
                 multipart << [
@@ -128,7 +129,16 @@ module SlightAssets
     end
     module_function :image_mime_type
 
-    def encoded_file_contents(file_path)
+    def encoded_file_contents(file_path, css_file_path = nil)
+      if css_file_path && defined?(@image_report) && @image_report.is_a?(Hash)
+        @image_report[file_path] ||= {:found_in => {}}
+        @image_report[file_path][:found_in][css_file_path] =
+          (@image_report[file_path][:found_in][css_file_path] || 0) + 1
+        if @image_report[file_path][:exists] = File.exists?(file_path)
+          @image_report[file_path][:embeddable] =
+            File.size(file_path) <= Cfg.maximum_embedded_file_size
+        end
+      end
       if File.exists?(file_path) && File.size(file_path) <= Cfg.maximum_embedded_file_size
         Base64.encode64(File.read(file_path)).gsub(/\n/, "")
       end
