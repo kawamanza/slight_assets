@@ -6,3 +6,11 @@ body {
     background-repeat: no-repeat;
     padding-left: 60px;
 }
+.ui-icon-1 {
+    background-image: url(../images/ui-icons.png);
+    background-position: 0 0;
+}
+.ui-icon-2 {
+    background-image: url(../images/ui-icons.png);
+    background-position: -16px 0;
+}
