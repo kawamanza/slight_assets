@@ -54,6 +54,16 @@ describe "SlightAssets::Util" do
       embed_content = SlightAssets::Util.embed_images(content, file_path)
       embed_content.should be == content
     end
+    it "should replace CSS imports" do
+      file_path = File.expand_path(File.join(*%w[.. .. fixtures import_others.css]), __FILE__)
+      content = File.read(file_path)
+      SlightAssets::Cfg.stubs(:replace_css_imports?).returns(true)
+      SlightAssets::Util.stubs(:asset_expand_path).with("other.css", anything).returns("other.css")
+      File.stubs(:exists?).with("other.css").returns(true)
+      embed_content = SlightAssets::Util.embed_images(content, file_path)
+      embed_content.should_not be == content
+      embed_content.should =~ /url\("other.min.css"\)/
+    end
   end
 
   context "writing" do

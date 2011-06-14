@@ -51,12 +51,22 @@ module SlightAssets
       file_url = asset_url(file_path)
       image_contents = {}
       multipart = ["/*\r\nContent-Type: multipart/related; boundary=\"MHTML_IMAGES\"\r\n"]
+      replace_imports = Cfg.replace_css_imports?
       content = content.gsub(Cfg.url_matcher) do |url_match|
         image_path = $1
+        quot = (url_match =~ /"/ ? "\"" : "")
         if image_path =~ /\A(?:[\\\/]|\w+:)/
           url_match
+        elsif image_path =~ /(\.min)?\.css\z/ && replace_imports
+          if $1
+            url_match
+          elsif File.exists?(asset_expand_path(image_path, file_path))
+            "url(#{quot}#{image_path.gsub(/\.css\z/, ".min.css")}#{quot})"
+          else
+            url_match
+          end
         else
-          image_file_path = File.expand_path(File.join("..", image_path), file_path)
+          image_file_path = asset_expand_path(image_path, file_path)
           if (mt = image_mime_type(image_path)) &&
              (encode64 = encoded_file_contents(image_file_path, file_path))
             if image_contents[image_file_path].nil?
@@ -76,12 +86,12 @@ module SlightAssets
                   "\r\nContent-Transfer-Encoding: base64\r\n\r\n",
                   encode64
                 ]
-                "url(mhtml:#{file_url}!#{part_name})"
+                "url(#{quot}mhtml:#{file_url}!#{part_name}#{quot})"
               else
                 url_match
               end
             else
-              "url(\"data:#{mt};base64,#{encode64}\")"
+              "url(#{quot}data:#{mt};base64,#{encode64}#{quot})"
             end
           else
             url_match
@@ -107,12 +117,17 @@ module SlightAssets
     def extract_images(content, file_path)
       images = {}
       content.scan(Cfg.url_matcher).flatten.each do |image_path|
-        image_file_path = File.expand_path(File.join("..", image_path), file_path)
+        image_file_path = asset_expand_path(image_path, file_path)
         images[image_file_path] = (images[image_file_path] || 0) + 1
       end
       images
     end
     module_function :extract_images
+
+    def asset_expand_path(relative_asset_path, absolute_source_file_path)
+      File.expand_path(File.join("..", relative_asset_path), absolute_source_file_path)
+    end
+    module_function :asset_expand_path
 
     def image_mime_type(path)
       return if path !~ /\.([^\.]+)$/
