@@ -56,7 +56,7 @@ describe "SlightAssets::Util" do
     end
     it "should replace CSS imports" do
       file_path = File.expand_path(File.join(*%w[.. .. fixtures import_others.css]), __FILE__)
-      content = File.read(file_path)
+      content = "@import url(\"other.css\")"
       SlightAssets::Cfg.stubs(:replace_css_imports?).returns(true)
       SlightAssets::Util.stubs(:asset_expand_path).with("other.css", anything).returns("other.css")
       File.stubs(:exists?).with("other.css").returns(true)
