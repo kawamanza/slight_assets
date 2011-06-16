@@ -37,6 +37,10 @@ module SlightAssets
       return file_path if compressor.nil?
       content = File.read(file_path)
       content = compressor.compress(content)
+      if extension == "js"
+        c = js_reduce(content)
+        content = c if c.bytesize < content.bytesize
+      end
       content = embed_images(content, min_path) if extension == "css"
       File.open(min_path, "w") { |f| f.write(content) }
       mt = File.mtime(file_path)
@@ -44,6 +48,15 @@ module SlightAssets
       min_path
     end
     module_function :write_static_minified_asset
+
+    def js_reduce(content)
+      unless (Cfg.js_reducer? == "rake" && is_rake?) || Cfg.js_reducer? == true
+        content
+      else
+        JsReducer.new.compress(content)
+      end
+    end
+    module_function :js_reduce
 
     def embed_images(content, file_path)
       return content if file_path =~ /\A(?:\w+:)?\/\//
@@ -145,7 +158,7 @@ module SlightAssets
     module_function :image_mime_type
 
     def encoded_file_contents(file_path, css_file_path = nil)
-      if css_file_path && defined?(@image_report) && @image_report.is_a?(Hash)
+      if css_file_path && is_rake?
         @image_report[file_path] ||= {:found_in => {}}
         @image_report[file_path][:found_in][css_file_path] =
           (@image_report[file_path][:found_in][css_file_path] || 0) + 1
@@ -159,6 +172,16 @@ module SlightAssets
       end
     end
     module_function :encoded_file_contents
+
+    def is_runtime?
+      ! is_rake?
+    end
+    module_function :is_runtime?
+
+    def is_rake?
+      defined?(@image_report) && @image_report.is_a?(Hash)
+    end
+    module_function :is_rake?
 
     def async_write_static_compressed_file(file_path, &block)
       lock_file_path = "#{file_path}.locked"

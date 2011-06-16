@@ -2,6 +2,16 @@ namespace :asset do
   namespace :compress do
     task :pre => :environment do
       require "slight_assets"
+      class AssetWriter
+        include ::SlightAssets::Util
+        attr_reader :image_report
+        def initialize
+          @image_report = {}
+        end
+        def write_compressed_file(file)
+          write_static_compressed_file(file)
+        end
+      end
     end
 
     desc "Compress all JS files from your Rails application"
@@ -11,9 +21,10 @@ namespace :asset do
         exit 1
       end
       jslist = FileList[File.join(Rails.root, *%w(public javascripts ** *.js))].select{|file| ! ( file =~ /\.min\.js$/ || File.exists?(file.gsub(/\.js$/, '.min.js')) ) }
+      writer = AssetWriter.new
       jslist.each do |jsfile|
         puts "Compressing #{jsfile[(Rails.root.to_s.size+1)..-1]}"
-        minfile = SlightAssets::Util.write_static_compressed_file(jsfile).chomp(".gz")
+        minfile = writer.write_compressed_file(jsfile).chomp(".gz")
         jssize = File.size(jsfile)
         minsize = File.size(minfile)
         percent = jssize.zero? ? 100 : (100.0 * minsize / jssize).round
@@ -28,18 +39,11 @@ namespace :asset do
         puts "WARN: No CSS compressor was found"
         exit 1
       end
-      class CssWriter
-        include ::SlightAssets::Util
-        attr_reader :image_report
-        def initialize
-          @image_report = {}
-        end
-      end
-      writer = CssWriter.new
+      writer = AssetWriter.new
       csslist = FileList[File.join(Rails.root, *%w(public stylesheets ** *.css))].select{|file| ! ( file =~ /\.min\.css$/ || File.exists?(file.gsub(/\.css$/, '.min.css')) ) }
       csslist.each do |cssfile|
         puts "Compressing #{cssfile[(Rails.root.to_s.size+1)..-1]}"
-        minfile = writer.send(:write_static_compressed_file, cssfile).chomp(".gz")
+        minfile = writer.write_compressed_file(cssfile).chomp(".gz")
         csssize = File.size(cssfile)
         minsize = File.size(minfile)
         percent = csssize.zero? ? 100 : (100.0 * minsize / csssize).round
