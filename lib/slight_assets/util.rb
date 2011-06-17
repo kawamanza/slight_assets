@@ -4,11 +4,11 @@ module SlightAssets
   module Util
     begin
       require "zlib"
-      def write_static_gzipped_file(file_path)
+      def write_static_gzipped_file(file_path, content = nil)
         return file_path if file_path.nil? || file_path.end_with?(".gz") || ! File.exists?(file_path)
         zip_path = "#{file_path}.gz"
         return zip_path if File.exists?(zip_path)
-        content = File.read(file_path)
+        content = File.read(file_path) if content.nil?
         Zlib::GzipWriter.open(zip_path, Zlib::BEST_COMPRESSION) {|f| f.write(content) }
         # Set mtime to the latest of the file to allow for
         # consistent ETag without a shared filesystem.
@@ -36,16 +36,18 @@ module SlightAssets
       end
       return file_path if compressor.nil?
       content = File.read(file_path)
-      content = compressor.compress(content)
-      if extension == "js"
-        c = js_reduce(content)
-        content = c if c.bytesize < content.bytesize
-      end
+      c = compressor.compress(content)
+      content = c if c.bytesize < content.bytesize
       content = embed_images(content, min_path) if extension == "css"
-      File.open(min_path, "w") { |f| f.write(content) }
+      reduced_content = content
+      if extension == "js"
+        reduced_content = js_reduce(content)
+        reduced_content = content if reduced_content.bytesize > content.bytesize
+      end
+      File.open(min_path, "w") { |f| f.write(reduced_content) }
       mt = File.mtime(file_path)
       File.utime(mt, mt, min_path)
-      min_path
+      [min_path, content]
     end
     module_function :write_static_minified_asset
 
@@ -198,8 +200,8 @@ module SlightAssets
     module_function :async_write_static_compressed_file
 
     def write_static_compressed_file(file_path)
-      file_path = write_static_minified_asset(file_path)
-      file_path = write_static_gzipped_file(file_path)
+      file_path, content = write_static_minified_asset(file_path)
+      file_path = write_static_gzipped_file(file_path, content)
     end
     module_function :write_static_compressed_file
 

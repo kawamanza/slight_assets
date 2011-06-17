@@ -83,7 +83,7 @@ describe "SlightAssets::Util" do
       min_path = @file_path.gsub(/\.(js|css)\z/, '.min.\1')
       File.delete(min_path) if File.exists?(min_path)
       File.should_not be_exists(min_path)
-      output_path = SlightAssets::Util.write_static_minified_asset(@file_path)
+      output_path, content = SlightAssets::Util.write_static_minified_asset(@file_path)
       output_path.should be == min_path
       File.should be_exists(min_path)
       File.delete(min_path)
