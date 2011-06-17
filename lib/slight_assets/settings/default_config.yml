@@ -5,6 +5,15 @@ slight_asset: &slight_asset
   # Must be less than or equal to "32kB"
   maximum_embedded_file_size: "32kB"
 
+  # Scope of assets to minify in batch process (rake).
+  # The prefix "-" indicates the files to exclude from minifying.
+  minify_assets:
+    - **/*.js
+    - **/*.css
+    # in the end, the masks below will be used for cleaning (even if omitted).
+    - -**/*.min.js
+    - -**/*.min.css
+
   # Absolute MHTML base href (Optional)
   # If present, the CSS images that was referenced twice or more
   # will be embedded inside a MHTML block

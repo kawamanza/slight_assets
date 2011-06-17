@@ -11,6 +11,36 @@ namespace :asset do
         def write_compressed_file(file)
           write_static_compressed_file(file)
         end
+        def js_list
+          unless defined?(@js_list)
+            @js_list = []
+            (SlightAssets::Cfg.minify_assets? || []).each do |mask|
+              if mask =~ /\A([+-])?\s*(.*\.js)\z/
+                oper = $1 || "+"
+                files_mask = [::Rails.root, "public", "javascripts", $2]
+                @js_list = @js_list.send(oper, FileList[File.join(*files_mask)])
+              end
+            end
+            files_mask = [::Rails.root, "public", "javascripts", "**", "*.min.js"]
+            @js_list = (@js_list - FileList[File.join(*files_mask)]).uniq.sort
+          end
+          @js_list
+        end
+        def css_list
+          unless defined?(@css_list)
+            @css_list = []
+            (SlightAssets::Cfg.minify_assets? || []).each do |mask|
+              if mask =~ /\A([+-])?\s*(.*\.css)\z/
+                oper = $1 || "+"
+                files_mask = [::Rails.root, "public", "stylesheets", $2]
+                @css_list = @css_list.send(oper, FileList[File.join(*files_mask)])
+              end
+            end
+            files_mask = [::Rails.root, "public", "stylesheets", "**", "*.min.css"]
+            @css_list = (@css_list - FileList[File.join(*files_mask)]).uniq.sort
+          end
+          @css_list
+        end
       end
     end
 
@@ -20,8 +50,8 @@ namespace :asset do
         puts "WARN: No JS compressor was found"
         exit 1
       end
-      jslist = FileList[File.join(Rails.root, *%w(public javascripts ** *.js))].select{|file| ! ( file =~ /\.min\.js$/ || File.exists?(file.gsub(/\.js$/, '.min.js')) ) }
       writer = AssetWriter.new
+      jslist = writer.js_list
       originalsize, compressedsize = 0, 0
       jslist.each do |jsfile|
         puts "Compressing #{jsfile[(Rails.root.to_s.size+1)..-1]}"
@@ -45,7 +75,7 @@ namespace :asset do
         exit 1
       end
       writer = AssetWriter.new
-      csslist = FileList[File.join(Rails.root, *%w(public stylesheets ** *.css))].select{|file| ! ( file =~ /\.min\.css$/ || File.exists?(file.gsub(/\.css$/, '.min.css')) ) }
+      csslist = writer.css_list
       csslist.each do |cssfile|
         puts "Compressing #{cssfile[(Rails.root.to_s.size+1)..-1]}"
         minfile = writer.write_compressed_file(cssfile).chomp(".gz")
