@@ -22,15 +22,20 @@ namespace :asset do
       end
       jslist = FileList[File.join(Rails.root, *%w(public javascripts ** *.js))].select{|file| ! ( file =~ /\.min\.js$/ || File.exists?(file.gsub(/\.js$/, '.min.js')) ) }
       writer = AssetWriter.new
+      originalsize, compressedsize = 0, 0
       jslist.each do |jsfile|
         puts "Compressing #{jsfile[(Rails.root.to_s.size+1)..-1]}"
         minfile = writer.write_compressed_file(jsfile).chomp(".gz")
-        jssize = File.size(jsfile)
-        minsize = File.size(minfile)
+        originalsize += jssize = File.size(jsfile)
+        compressedsize += minsize = File.size(minfile)
         percent = jssize.zero? ? 100 : (100.0 * minsize / jssize).round
         puts "  -> #{jssize} bytes to #{minsize} bytes (#{percent}% size)"
       end
-      puts "Total: #{jslist.size} JS files were compressed" if jslist.any?
+      if jslist.any?
+        puts "Total #{jslist.size} JS files were compressed"
+        percent = originalsize.zero? ? 100 : (100.0 * compressedsize / originalsize).round
+        puts "  -> reduced from #{originalsize} bytes to #{compressedsize} bytes (#{percent}% size total, #{originalsize - compressedsize} bytes saved)"
+      end
     end
 
     desc "Compress all CSS files from your Rails application"
