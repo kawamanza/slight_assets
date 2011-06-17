@@ -40,7 +40,7 @@ module SlightAssets
           when "kB", "kb"
             c = c * 1_024
           end
-          @maximum_embedded_file_size = c
+          @maximum_embedded_file_size = [c, 32 * 1_024].min
         end
       end
       @maximum_embedded_file_size

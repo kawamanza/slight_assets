@@ -2,7 +2,8 @@ slight_asset: &slight_asset
 
   # Maximum embedded file size
   # The limit file size to decide whether or not to embed
-  maximum_embedded_file_size: "15kB"
+  # Must be less than or equal to "32kB"
+  maximum_embedded_file_size: "32kB"
 
   # Absolute MHTML base href (Optional)
   # If present, the CSS images that was referenced twice or more
