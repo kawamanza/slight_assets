@@ -9,7 +9,7 @@ module SlightAssets
     def compress(js_content, last_occurrences = true)
       content = reduce(js_content, last_occurrences)
       return js_content if content == js_content
-      func = 'function(x){var b="",p=0,c,l,L=x.length,m="`";while(p<L){b+=(c=x[p++])==m?((l=x.charCodeAt(p++)-28)>4?b.substr(b.length-x.charCodeAt(p++)*96-x.charCodeAt(p++)+3104-l,l):m):c}return b}'
+      func = 'function(x){var b="",p=0,c,l,L=x.length,m="`";while(p<L)b+=(c=x[p++])!=m?c:(l=x.charCodeAt(p++)-28)>4?b.substr(b.length-x.charCodeAt(p++)*96-x.charCodeAt(p++)+3104-l,l):m;return b}'
       content = content.gsub(/([\\"])/, '\\\\\\1').gsub(/\r/, "\\r").gsub(/\n/, "\\n")
       "eval((#{func})(\"#{content}\"))"
     end
@@ -40,7 +40,6 @@ module SlightAssets
             cropindex = pos while (pos = content.index(chars, cropindex + 1)) && pos <= max_start
           end
           output << LOOKUP_CHAR
-          cs = BYTE_RANGE.first - 4 + cropsize
           output << BYTE_RANGE.first - 4 + cropsize
           offset = (index - cropindex) - cropsize
           output << BYTE_RANGE.first + (offset / BASE_NUMBER)
