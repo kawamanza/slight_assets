@@ -1,0 +1,42 @@
+slight_asset: &slight_asset
+
+  # Maximum embedded file size
+  # The limit file size to decide whether or not to embed
+  # Must be less than or equal to "32kB"
+  maximum_embedded_file_size: "32kB"
+
+  # Scope of assets to minify in batch process (rake).
+  # The prefix "-" indicates the files to exclude from minifying.
+  # Keep in mind that the sequence matters.
+  minify_assets:
+    - **/*.js
+    - **/*.css
+    # in the end, the masks below will be used for cleaning (even if omitted).
+    - -**/*.min.js
+    - -**/*.min.css
+
+  # Absolute MHTML base href (Optional)
+  # If present, the CSS images that was referenced twice or more
+  # will be embedded inside a MHTML block
+  #mhtml_base_href: "http://localhost:3000"
+
+  # JavaScript Reducer (Optional)
+  # This mode enables obfuscation for JavaScript compression, reducing
+  # even more the file size.
+  # Sets the JavaScript reduce mode:
+  #   "rake" - Reduce only when executing rake task (asset:compress:js)
+  #   true   - Reduce at runtime or when executing rake
+  #   false  - Don't reduce JavaScript's
+  js_reducer: false
+
+development:
+  slight_asset:
+    <<: *slight_asset
+
+test:
+  slight_asset:
+    <<: *slight_asset
+
+production:
+  slight_asset:
+    <<: *slight_asset

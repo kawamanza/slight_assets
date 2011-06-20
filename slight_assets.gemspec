@@ -24,7 +24,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "mocha"
   s.add_development_dependency "closure-compiler"
 
-  s.files              = `git ls-files -- lib/*`.split("\n")
+  s.files              = `git ls-files -- {generators,lib,templates}/*`.split("\n")
   s.test_files         = []
   s.executables        = []
+  s.require_paths      = ["lib"]
 end
