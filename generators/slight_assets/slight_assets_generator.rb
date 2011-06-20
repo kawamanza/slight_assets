@@ -4,6 +4,7 @@ class SlightAssetsGenerator < ::Rails::Generator::Base
   def manifest
     record do |m|
       m.file "config/assets.yml", "config/assets.yml"
+      m.file "config/initializers/assets.rb", "config/initializers/assets.rb"
     end
   end
 
