@@ -7,6 +7,7 @@ slight_asset: &slight_asset
 
   # Scope of assets to minify in batch process (rake).
   # The prefix "-" indicates the files to exclude from minifying.
+  # Keep in mind that the sequence matters.
   minify_assets:
     - **/*.js
     - **/*.css

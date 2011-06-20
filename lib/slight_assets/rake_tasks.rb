@@ -46,6 +46,7 @@ namespace :asset do
 
     desc "Compress all JS files from your Rails application"
     task :js => :pre do
+      puts "=" * 80
       if SlightAssets::Util.js_compressor.nil?
         puts "WARN: No JS compressor was found"
         exit 1
@@ -53,38 +54,45 @@ namespace :asset do
       writer = AssetWriter.new
       jslist = writer.js_list
       originalsize, compressedsize = 0, 0
+      start_time = Time.now
       jslist.each do |jsfile|
-        puts "Compressing #{jsfile[(Rails.root.to_s.size+1)..-1]}"
+        print "Compressing #{jsfile[(Rails.root.to_s.size+1)..-1]}"
+        time = Time.now
         minfile = writer.write_compressed_file(jsfile).chomp(".gz")
         originalsize += jssize = File.size(jsfile)
         compressedsize += minsize = File.size(minfile)
         percent = jssize.zero? ? 100 : (100.0 * minsize / jssize).round
-        puts "  -> #{jssize} bytes to #{minsize} bytes (#{percent}% size)"
+        puts " (#{Time.now - time}s)\n  -> #{jssize} bytes to #{minsize} bytes (#{percent}% size)"
       end
       if jslist.any?
         puts "Total #{jslist.size} JS files were compressed"
         percent = originalsize.zero? ? 100 : (100.0 * compressedsize / originalsize).round
         puts "  -> reduced from #{originalsize} bytes to #{compressedsize} bytes (#{percent}% size total, #{originalsize - compressedsize} bytes saved)"
       end
+      puts "Elapsed time: #{Time.now - start_time}s"
     end
 
     desc "Compress all CSS files from your Rails application"
     task :css => :pre do
+      puts "=" * 80
       if SlightAssets::Util.css_compressor.nil?
         puts "WARN: No CSS compressor was found"
         exit 1
       end
       writer = AssetWriter.new
       csslist = writer.css_list
+      start_time = Time.now
       csslist.each do |cssfile|
-        puts "Compressing #{cssfile[(Rails.root.to_s.size+1)..-1]}"
+        print "Compressing #{cssfile[(Rails.root.to_s.size+1)..-1]}"
+        time = Time.now
         minfile = writer.write_compressed_file(cssfile).chomp(".gz")
         csssize = File.size(cssfile)
         minsize = File.size(minfile)
         percent = csssize.zero? ? 100 : (100.0 * minsize / csssize).round
-        puts "  -> #{csssize} bytes to #{minsize} bytes (#{percent}% size)"
+        puts " (#{Time.now - time}s)\n  -> #{csssize} bytes to #{minsize} bytes (#{percent}% size)"
       end
       puts "Total: #{csslist.size} CSS files were compressed" if csslist.any?
+      puts "Elapsed time: #{Time.now - start_time}s"
       if writer.image_report.any?
         puts "=" * 80
         writer.image_report.each_pair do |image_file, report|
