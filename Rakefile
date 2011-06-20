@@ -19,4 +19,24 @@ rescue LoadError
   end
 end
 
+desc "Build the gem"
+task :build do
+  gem_name = 'slight_assets'
+  opers = Dir.glob('*.gem')
+  opers = ["rm #{ opers.join(' ') }"] unless opers.empty?
+  opers << ["gem build #{gem_name}.gemspec"]
+  sh opers.join(" && ")
+end
+
+desc "Build and install the gem, removing old installation"
+task :install => :build do
+  gem_file = Dir.glob('*.gem').first
+  gem_name = 'slight_assets'
+  if gem_file.nil?
+    puts "could not install the gem"
+  else
+    sh "gem uninstall --ignore-dependencies #{gem_name}; gem install #{ gem_file }"
+  end
+end
+
 task :default => :spec
