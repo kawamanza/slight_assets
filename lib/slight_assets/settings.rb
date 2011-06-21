@@ -52,6 +52,6 @@ module SlightAssets
   end
 
   Cfg = Config.new
-  Cfg.load_config File.expand_path(File.join(*%w[.. settings default_config.yml]), __FILE__)
+  Cfg.load_config File.expand_path(File.join(*%w[.. .. .. templates install config assets.yml]), __FILE__)
   Cfg.load_config ::Rails.root.join(*%w[config assets.yml]) if defined?(::Rails)
 end
