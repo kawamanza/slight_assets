@@ -75,7 +75,7 @@ module SlightAssets
           end
         else
           image_file_path = asset_expand_path(image_path, file_path)
-          if (mt = image_mime_type(image_path)) &&
+          if (mt = image_mime_type(image_path) || file_url.nil? && font_mime_type(image_path)) &&
              (encode64 = encoded_file_contents(image_file_path, file_path))
             if image_contents[image_file_path].nil?
               part_name = "img#{multipart.size}_#{File.basename(image_file_path)}"
@@ -151,6 +151,19 @@ module SlightAssets
       end
     end
     module_function :image_mime_type
+
+    def font_mime_type(path)
+      return if path !~ /\.([^\.]+)$/
+      case $1.downcase.to_sym
+      when :ttf
+        "font/truetype"
+      when :otf
+        "font/opentype"
+      when :woff
+        "font/woff"
+      end
+    end
+    module_function :font_mime_type
 
     def encoded_file_contents(file_path, css_file_path = nil)
       if css_file_path && is_rake?

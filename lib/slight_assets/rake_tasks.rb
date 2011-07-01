@@ -41,6 +41,15 @@ namespace :asset do
           end
           @css_list
         end
+        def mime_type_title_of(path)
+          if image_mime_type(path)
+            "Image"
+          elsif font_mime_type(path)
+            "Font"
+          else
+            "Media"
+          end
+        end
       end
     end
 
@@ -97,7 +106,7 @@ namespace :asset do
         puts "=" * 80
         writer.image_report.each_pair do |image_file, report|
           refs = report[:found_in].size
-          puts "Image: #{image_file[(Rails.public_path.size)..-1]} (#{"\033[1;31m" unless refs == 1}#{refs} occurrence#{"s" unless refs == 1}\033[0m)"
+          puts "#{writer.mime_type_title_of(image_file)}: #{image_file[(Rails.public_path.size)..-1]} (#{"\033[1;31m" unless refs == 1}#{refs} occurrence#{"s" unless refs == 1}\033[0m)"
           report[:found_in].each_pair do |css_file, count|
             mode = report[:exists] ? (report[:embeddable] && count == 1 ? "embedded" : "\033[0;33mnot embedded\033[0m") : "\033[0;31mnot found\033[0m"
             puts "  found in #{css_file[(Rails.public_path.size)..-1]} (#{count} ref#{"s" unless count == 1}, #{mode})"

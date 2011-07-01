@@ -24,6 +24,7 @@ Now you can enjoy the benefits of your faster Rails application.
   - CSS compression (with YUI::CssCompressor)
   - CSS compression and concatenation (with the normal view-helper `stylesheet_link_tag`)
   - CSS auto-embedding existing relative images
+  - CSS auto-embedding existing relative fonts
   - JavaScript compression (with Closure::Compiler or YUI::JavaScriptCompressor)
   - JavaScript obfuscation and reduction (with internal reductor algorithm)
   - JavaScript compression and concatenation (with the normal view-helper `javascript_include_tag`)
