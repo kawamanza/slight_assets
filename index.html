@@ -1,0 +1,198 @@
+<!DOCTYPE html >
+<html>
+<head>
+  <title>Slight Assets</title>
+  <link href="stylesheets/application.css" media="all" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <div id="body">
+    <h1>Slight Assets</h1>
+    <div id="intro" class="rad5">
+      The best way to optimize the assets of your Rails application without change any line of code.
+    </div>
+    <h2>Usage</h2>
+    <p>Put the lines below into your application's Gemfile:</p>
+    <pre class="ruby-lang">
+<span class="keyw">gem</span> <span class="str">"closure-compiler"</span> <span class="comm"># optional, but recommended</span>
+<span class="keyw">gem</span> <span class="str">"slight_assets"</span>
+<span class="keyw">gem</span> <span class="str">"utf8"</span> <span class="keyw">if</span> <span class="const">RUBY_VERSION</span>.to_f &lt; <span class="num">1.9</span></pre>
+    <p>Creates an initializer with the following lines:</p>
+    <pre class="ruby-lang">
+<span class="comm"># config/initializers/assets.rb</span>
+<span class="keyw">require</span> <span class="str">"slight_assets"</span>
+
+<span class="const">SlightAssets</span>::<span class="const">Rails</span>.init!</pre>
+    <p>Now you can enjoy the benefits of your faster Rails application.</p>
+    <h2>Benefits</h2>
+    <ul>
+      <li>CSS compression (with YUI::CssCompressor)</li>
+      <li>CSS compression and concatenation (with the normal view-helper <code>stylesheet_link_tag</code>)</li>
+      <li>CSS auto-embedding existing relative images</li>
+      <li>CSS auto-embedding existing relative fonts</li>
+      <li>JavaScript compression (with Closure::Compiler or YUI::JavaScriptCompressor)</li>
+      <li>JavaScript obfuscation and reduction (with internal reductor algorithm)</li>
+      <li>JavaScript compression and concatenation (with the normal view-helper <code>javascript_include_tag</code>)</li>
+    </ul>
+    <p>The list above has all benefits at runtime in your Rails application.</p>
+    <h2>Pre-generating compressed content</h2>
+    <p>You can further improve the performance of your application by pre-generating compressed content with the use of rake tasks.</p>
+    <p>Put the following line into your application's Rakefile:</p>
+    <pre class="ruby-lang">
+<span class="keyw">require</span> <span class="str">"slight_assets/rake_tasks"</span></pre>
+    <p>Now you can pre-generate the compressed content by using the following tasks:</p>
+    <pre class="bash-lang">
+<span class="prompt">$</span> rake asset:compress:css  <span class="comm"># Compress all CSS files from your Rails application</span>
+<span class="prompt">$</span> rake asset:compress:js   <span class="comm"># Compress all JS files from your Rails application</span>
+<span class="prompt">$</span> rake asset:compress      <span class="comm"># Compress all JS and CSS files from your Rails application</span></pre>
+    <h2>Rails Generators</h2>
+    <p>The SlightAssets gem has some internal settings. <strong><em>You can import these settings to your rails application for customization</em></strong>.</p>
+    <p>For Rails 2.3 applications you may do the following:</p>
+    <pre class="bash-lang">
+<span class="prompt">$</span> cd path-to-your-project
+<span class="prompt">$</span> script/generate slight_assets</pre>
+    <p>If you have a Rails 3 application, the command is:</p>
+    <pre class="bash-lang">
+<span class="prompt">$</span> cd path-to-your-project
+<span class="prompt">$</span> script/rails generate slight_assets:install</pre>
+    <p>This command adds the following files into your rails application:</p>
+    <dl class="definitions">
+      <dt>config/assets.yml</dt>
+      <dd>custom configuration file</dd>
+      <dt>config/initializers/assets.rb</dt>
+      <dd>SlightAssets initializer</dd>
+    </dl>
+    <h2>Settings</h2>
+    <p>You may customize the way the assets are minified on your rails application. Follows
+      the basic parameters of <code>config/assets.yml</code> configuration file:</p>
+    <dl class="definitions">
+      <dt>maximum_embedded_file_size (string)</dt>
+      <dd>The limit file size to decide whether or not to embed medias into CSS.</dd>
+      <dt>minify_assets (list)</dt>
+      <dd>Scope of assets to minify in batch process (rake).</dd>
+      <dt>js_reducer (boolean)</dt>
+      <dd>This mode enables obfuscation for JavaScript compression, reducing
+        even more the file size.</dd>
+      <dd></dd>
+    </dl>
+    <h2>JavaScript compression</h2>
+    <p>This utility has an innovative feature that further reduces the size of the JS files. Below is a comparison with some known compressors:</p>
+    <table class="comparison" border="0" cellspacing="0">
+      <tr>
+        <th>SOURCE</th>
+        <th>YUI<br />Compressor</th>
+        <th>ClosureCompiler</th>
+        <th><a href="http://www.javascript-source.com/javascript-obfuscator.html">JS Obfuscator<br />4.0</a></th>
+        <th class="enhanced">SlightAssets<br />(JS Reducer)</th>
+      </tr>
+      <tr>
+        <td>
+          <a href="javascripts/jquery-1.3.2.js">jQuery 1.3.2</a><br />
+          124 995 bytes
+        </td>
+        <td class="minified">
+          <a href="javascripts/jquery-1.3.2.yui.min.js">source + yui</a><br />
+          73 538 bytes<br />
+          <span class="percent">59%</span>
+        </td>
+        <td class="minified">
+          <a href="javascripts/jquery-1.3.2.cc.min.js">source + cc</a><br />
+          54 903 bytes<br />
+          <span class="percent">44%</span>
+        </td>
+        <td class="minified">
+          <a href="javascripts/jquery-1.3.2.jso.min.js">source + jso4</a><br />
+          44 429 bytes<br />
+          <span class="percent">35%</span>
+        </td>
+        <td class="enhanced">
+          <a href="javascripts/jquery-1.3.2.yui.sa.min.js">source + yui + sa</a><br />
+          38 565 bytes<br />
+          <span class="percent">31%</span><br />
+          <br />
+          <a href="javascripts/jquery-1.3.2.cc.sa.min.js">source + cc + sa</a><br />
+          31 882 bytes<br />
+          <span class="percent">26%</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="javascripts/mootools-1.2.2-core-nc.js">MooTools 1.2.2</a><br />
+          103 064 bytes
+        </td>
+        <td class="minified">
+          <a href="javascripts/mootools-1.2.2-core-nc.yui.min.js">source + yui</a><br />
+          77 783 bytes<br />
+          <span class="percent">75%</span>
+        </td>
+        <td class="minified">
+          <a href="javascripts/mootools-1.2.2-core-nc.cc.min.js">source + cc</a><br />
+          62 441 bytes<br />
+          <span class="percent">61%</span>
+        </td>
+        <td class="minified">
+          <a href="javascripts/mootools-1.2.2-core-nc.jso.min.js">source + jso4</a><br />
+          47 026 bytes<br />
+          <span class="percent">46%</span>
+        </td>
+        <td class="enhanced">
+          <a href="javascripts/mootools-1.2.2-core-nc.yui.sa.min.js">source + yui + sa</a><br />
+          40 743 bytes<br />
+          <span class="percent">40%</span><br />
+          <br />
+          <a href="javascripts/mootools-1.2.2-core-nc.cc.sa.min.js">source + cc + sa</a><br />
+          33 788 bytes<br />
+          <span class="percent">33%</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="javascripts/prototype-1.6.0.2.js">Prototype 1.6.0.2</a><br />
+          130 349 bytes
+        </td>
+        <td class="minified">
+          <a href="javascripts/prototype-1.6.0.2.yui.min.js">source + yui</a><br />
+          93 113 bytes<br />
+          <span class="percent">71%</span>
+        </td>
+        <td class="minified">
+          <a href="javascripts/prototype-1.6.0.2.cc.min.js">source + cc</a><br />
+          71 679 bytes<br />
+          <span class="percent">55%</span>
+        </td>
+        <td class="minified">
+          <a href="javascripts/prototype-1.6.0.2.jso.min.js">source + jso4</a><br />
+          48 244 bytes<br />
+          <span class="percent">37%</span>
+        </td>
+        <td class="enhanced">
+          <a href="javascripts/prototype-1.6.0.2.yui.sa.min.js">source + yui + sa</a><br />
+          41 841 bytes<br />
+          <span class="percent">32%</span><br />
+          <br />
+          <a href="javascripts/prototype-1.6.0.2.cc.sa.min.js">source + cc + sa</a><br />
+          36 348 bytes<br />
+          <span class="percent">28%</span>
+        </td>
+      </tr>
+    </table>
+    <p>The internal JS Reducer algorithm is like Javascript Obfuscator, the code is a
+      mix of encryption and compression that minimizes the file size. But if the
+      browser accepts the content gzipped, the best way is deliver it as that, the file
+      will be even smaller.</p>
+  </div>
+  <div id="footer">
+    <div class="l">
+      <a href="http://github.com/kawamanza/slight_assets">Project Homepage</a>
+    </div>
+    <div class="r">
+      <a href="http://github.com/kawamanza/slight_assets/issues">Issue Tracker</a>
+    </div>
+    <div class="mid">
+      Copyright &copy; 2011 Marcelo Manzan. All Rights Reserved.
+    </div>
+  </div>
+  <a href="http://github.com/kawamanza/slight_assets/" id="github">
+    <img src="images/forkme_right_darkblue_121621.png">
+  </a>
+</body>
+</html>
