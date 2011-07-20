@@ -3,12 +3,11 @@ h1 {text-align: center;}
 h2 {border-bottom: 3px solid rgba(0, 0, 0, 0.75); margin-top: 24px; padding: 5px;}
 code {background-color: rgba(0, 0, 0, 0.1); border: 1px solid rgba(0, 0, 0, 0.1); padding: 0 3px;}
 pre {background-color: rgba(0, 0, 0, 0.8); color: #F8F8F8; font-family: Monaco, monospace; font-size: 0.8em; padding: 10px;}
-a {color: #C58917;}
+a {color: #827839;}
 
 div#body {width: 725px; margin: 0 auto;}
 div#footer {background-color: rgba(0, 0, 0, 0.1); -moz-box-sizing: border-box; box-sizing: border-box; margin-bottom: 25px; margin-top: 25px; padding: 16px; width: 100%;}
 div#footer .mid {width: 725px; margin: 0 auto; text-align: center;}
-div#footer a {color: #827839;}
 div#intro {background-color: rgba(0, 0, 0, 0.1); font-size: 1.09em; padding: 10px;}
 div.contents .content {}
 pre.ruby-lang .str {color: #65B042;}
@@ -19,9 +18,13 @@ pre.ruby-lang .sym {color: #3387CC;}
 pre.ruby-lang .const {color: #C34A2C;}
 pre.ruby-lang .num {color: #C11B17;}
 pre.bash-lang .prompt {color: #E3D796;}
+pre.bash-lang .light-red {color: #C34A2C;}
+pre.bash-lang .yellow {color: #C58917;}
+pre.bash-lang .output {color: rgba(255, 255, 255, .8);}
 dl.definitions dt {font-weight: bold; padding-bottom: 10px;}
 dl.definitions dt:nth-child(n+2) {padding-top: 10px;}
 table.comparison {background-color: rgba(0, 0, 0, 0.75); color: #C9C299; width: 100%;}
+table.comparison a {color: #C58917;}
 table.comparison th {width: 20%; padding: 15px 10px;}
 table.comparison td {text-align: center; padding: 15px 10px;}
 table.comparison tr:nth-child(n+2) {background-color: rgba(255, 255, 255, 0.05);}

@@ -16,34 +16,13 @@
 <span class="keyw">gem</span> <span class="str">"closure-compiler"</span> <span class="comm"># optional, but recommended</span>
 <span class="keyw">gem</span> <span class="str">"slight_assets"</span>
 <span class="keyw">gem</span> <span class="str">"utf8"</span> <span class="keyw">if</span> <span class="const">RUBY_VERSION</span>.to_f &lt; <span class="num">1.9</span></pre>
-    <p>Creates an initializer with the following lines:</p>
+    <p>Creates an initializer with the following lines: (or see section "Rails Generators" below)</p>
     <pre class="ruby-lang">
 <span class="comm"># config/initializers/assets.rb</span>
 <span class="keyw">require</span> <span class="str">"slight_assets"</span>
 
 <span class="const">SlightAssets</span>::<span class="const">Rails</span>.init!</pre>
     <p>Now you can enjoy the benefits of your faster Rails application.</p>
-    <h2>Benefits</h2>
-    <ul>
-      <li>CSS compression (with YUI::CssCompressor)</li>
-      <li>CSS compression and concatenation (with the normal view-helper <code>stylesheet_link_tag</code>)</li>
-      <li>CSS auto-embedding existing relative images</li>
-      <li>CSS auto-embedding existing relative fonts</li>
-      <li>JavaScript compression (with Closure::Compiler or YUI::JavaScriptCompressor)</li>
-      <li>JavaScript obfuscation and reduction (with internal reductor algorithm)</li>
-      <li>JavaScript compression and concatenation (with the normal view-helper <code>javascript_include_tag</code>)</li>
-    </ul>
-    <p>The list above has all benefits at runtime in your Rails application.</p>
-    <h2>Pre-generating compressed content</h2>
-    <p>You can further improve the performance of your application by pre-generating compressed content with the use of rake tasks.</p>
-    <p>Put the following line into your application's Rakefile:</p>
-    <pre class="ruby-lang">
-<span class="keyw">require</span> <span class="str">"slight_assets/rake_tasks"</span></pre>
-    <p>Now you can pre-generate the compressed content by using the following tasks:</p>
-    <pre class="bash-lang">
-<span class="prompt">$</span> rake asset:compress:css  <span class="comm"># Compress all CSS files from your Rails application</span>
-<span class="prompt">$</span> rake asset:compress:js   <span class="comm"># Compress all JS files from your Rails application</span>
-<span class="prompt">$</span> rake asset:compress      <span class="comm"># Compress all JS and CSS files from your Rails application</span></pre>
     <h2>Rails Generators</h2>
     <p>The SlightAssets gem has some internal settings. <strong><em>You can import these settings to your rails application for customization</em></strong>.</p>
     <p>For Rails 2.3 applications you may do the following:</p>
@@ -61,6 +40,17 @@
       <dt>config/initializers/assets.rb</dt>
       <dd>SlightAssets initializer</dd>
     </dl>
+    <h2>Benefits</h2>
+    <ul>
+      <li>CSS compression (with YUI::CssCompressor)</li>
+      <li>CSS compression and concatenation (with the normal view-helper <code>stylesheet_link_tag</code>)</li>
+      <li>CSS auto-embedding existing relative images</li>
+      <li>CSS auto-embedding existing relative fonts</li>
+      <li>JavaScript compression (with Closure::Compiler or YUI::JavaScriptCompressor)</li>
+      <li>JavaScript obfuscation and reduction (with internal reductor algorithm)</li>
+      <li>JavaScript compression and concatenation (with the normal view-helper <code>javascript_include_tag</code>)</li>
+    </ul>
+    <p>The list above has all benefits at runtime in your Rails application.</p>
     <h2>Settings</h2>
     <p>You may customize the way the assets are minified on your rails application. Follows
       the basic parameters of <code>config/assets.yml</code> configuration file:</p>
@@ -74,6 +64,33 @@
         even more the file size.</dd>
       <dd></dd>
     </dl>
+    <h2>Pre-generating compressed content</h2>
+    <p>You can further improve the performance of your application by pre-generating compressed content with the use of rake tasks.</p>
+    <p>Put the following line into your application's Rakefile:</p>
+    <pre class="ruby-lang">
+<span class="keyw">require</span> <span class="str">"slight_assets/rake_tasks"</span></pre>
+    <p>Now you can pre-generate the compressed content by using the following tasks:</p>
+    <pre class="bash-lang">
+<span class="prompt">$</span> rake asset:compress:css  <span class="comm"># Compress all CSS files from your Rails application</span>
+<span class="prompt">$</span> rake asset:compress:js   <span class="comm"># Compress all JS files from your Rails application</span>
+<span class="prompt">$</span> rake asset:compress      <span class="comm"># Compress all JS and CSS files from your Rails application</span></pre>
+    <h2>CSS compression</h2>
+    <p>The rake task gives you a great report of compression about all referenced medias (images/fonts) found into each CSS file.
+      With this report in hand you can make great changes on your stylesheets for performance improvement of requests in your application.</p>
+    <p>Sample report fragment:</p>
+    <pre class="bash-lang">
+<span class="prompt">$</span> rake asset:compress:css
+<span class="output">================================================================================
+Compressing public/stylesheets/_base.css (1.703383s)
+  -&gt; 598 bytes to 2642 bytes (442% size)
+Compressing public/stylesheets/_index_base.css (2.023475s)
+  -&gt; 1375 bytes to 457 bytes (33% size)
+Total: 2 CSS files were compressed
+Elapsed time: 3.910422s
+================================================================================
+Image: /images/ico-pagination-prev-disabled.png (<span class="light-red">2 occurrences</span>)
+  found in /stylesheets/_index_base.min.css (2 refs, <span class="yellow">not embedded</span>)
+  found in /stylesheets/_base.min.css (1 ref, embedded)</span></pre>
     <h2>JavaScript compression</h2>
     <p>This utility has an innovative feature that further reduces the size of the JS files. Below is a comparison with some known compressors:</p>
     <table class="comparison" border="0" cellspacing="0">
