@@ -6,7 +6,7 @@ slight_asset: &slight_asset
   maximum_embedded_file_size: "32kB"
 
   # Enable minification at runtime
-  runtime_compression: false
+  runtime_compression: true
 
   # Scope of assets to minify in batch process (rake).
   # The prefix "-" indicates the files to exclude from minifying.
@@ -43,3 +43,4 @@ test:
 production:
   slight_asset:
     <<: *slight_asset
+    runtime_compression: false
