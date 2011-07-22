@@ -59,10 +59,11 @@
       <dd>The limit file size to decide whether or not to embed medias into CSS.</dd>
       <dt>minify_assets (list)</dt>
       <dd>Scope of assets to minify in batch process (rake).</dd>
+      <dt>runtime_compression (boolean)</dt>
+      <dd>Enable minification at runtime (default to <code>true</code>, except on production mode)</dd>
       <dt>js_reducer (boolean)</dt>
       <dd>This mode enables obfuscation for JavaScript compression, reducing
         even more the file size.</dd>
-      <dd></dd>
     </dl>
     <h2>Pre-generating compressed content</h2>
     <p>You can further improve the performance of your application by pre-generating compressed content with the use of rake tasks.</p>
