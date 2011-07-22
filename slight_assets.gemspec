@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.version     = SlightAssets::VERSION
   s.authors     = ["Marcelo Manzan"]
   s.email       = ["manzan@gmail.com"]
-  s.homepage    = "https://github.com/kawamanza/slight_assets"
+  s.homepage    = "http://kawamanza.github.com/slight_assets"
   s.summary     = %q{All you need to make your rails application more fast.}
   s.description = %q{Optimize the assets of your Rails application without change any line of code.}
 
