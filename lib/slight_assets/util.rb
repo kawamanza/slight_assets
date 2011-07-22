@@ -192,6 +192,7 @@ module SlightAssets
     module_function :is_rake?
 
     def async_write_static_compressed_file(file_path, &block)
+      return if is_runtime? && (Cfg.runtime_compression?.nil? || !Cfg.runtime_compression?)
       lock_file_path = "#{file_path}.locked"
       return if File.exists?(lock_file_path) && File.mtime(lock_file_path) > (Time.now - 120)
       File.open(lock_file_path, "w"){}  # touch

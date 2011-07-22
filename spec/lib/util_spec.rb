@@ -115,6 +115,7 @@ describe "SlightAssets::Util" do
       File.should_not be_exists(min_path)
       File.should_not be_exists(zip_path)
 
+      SlightAssets::Cfg.stubs(:runtime_compression?).returns(true)
       SlightAssets::Util.async_write_static_compressed_file(@file_path)
       while File.exists?(lock_file_path); end
 
