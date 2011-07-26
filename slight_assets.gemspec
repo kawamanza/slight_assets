@@ -26,6 +26,6 @@ Gem::Specification.new do |s|
 
   s.files              = `git ls-files -- {generators,lib,templates}/*`.split("\n")
   s.test_files         = []
-  s.executables        = []
+  s.executables        = %w[slight]
   s.require_paths      = ["lib"]
 end

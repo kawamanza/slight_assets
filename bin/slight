@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+
+options = {
+  :js_reducer => false,
+  :maximum_embedded_file_size => "32kb"
+}
+optparse = ARGV.options do |opt|
+  opt.banner = <<BANNER
+Asset minifier.
+Usage: #{File.basename __FILE__} [options] <asset-file-path>
+BANNER
+  opt.on("-o", "--obfuscate-js", "Enables obfuscation for JS minification") do
+    options[:js_reducer] = true
+  end
+  opt.on("-s", "--size SIZE_IN_KBYTES", "Maximum embedded file size for CSS minification") do |size|
+    size = "#{size}kb" if size =~ /\A\d+\z/
+    options[:maximum_embedded_file_size] = size
+  end
+  opt.on_tail("-h", "--help", "Display this help") do
+    puts opt
+    exit 1
+  end
+end
+optparse.parse!
+
+assetfile = ARGV.pop
+
+if assetfile.nil? || assetfile !~ /(\.min)?\.(?:js|css)\z/ || $1 || ! File.exists?(assetfile)
+  puts optparse
+  exit 1
+end
+
+
+require "rubygems"
+require "slight_assets"
+
+SlightAssets::Cfg.load_config(options)
+SlightAssets::Util.write_static_compressed_file(assetfile)

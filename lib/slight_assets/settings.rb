@@ -21,10 +21,18 @@ module SlightAssets
     end
 
     def load_config(path)
-      return @config unless File.exists? path
-      hash = YAML.load_file(path)
-      hash = hash[::Rails.env] || hash if defined?(::Rails)
-      @config.merge! hash["slight_asset"] if hash.has_key?("slight_asset")
+      if path.is_a?(Hash)
+        path.each_pair do |key, value|
+          k = key.to_s
+          v = value.nil? ? @config[k] : value
+          @config[k] = v if @config.has_key?(k)
+        end
+      else
+        return @config unless File.exists? path
+        hash = YAML.load_file(path)
+        hash = hash[::Rails.env] || hash if defined?(::Rails)
+        @config.merge! hash["slight_asset"] if hash.has_key?("slight_asset")
+      end
     rescue TypeError => e
       puts "could not load #{path}: #{e.inspect}"
     end
@@ -37,7 +45,7 @@ module SlightAssets
         elsif c =~ /\A(\d+)\s*(\w+)\z/
           c = $1.to_i
           case $2
-          when "kB", "kb"
+          when "kB", "kb", "k", "K"
             c = c * 1_024
           end
           @maximum_embedded_file_size = [c, 32 * 1_024].min
