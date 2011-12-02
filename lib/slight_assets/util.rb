@@ -29,6 +29,7 @@ module SlightAssets
       end
       return file_path if compressor.nil?
       content = File.read(file_path)
+      info = content =~ /\A\s*(\/\*!\r?\n.*?\*\/\r?\n)/m ? $1 : ""
       c = compressor.compress(content)
       content = c if c.bytesize < content.bytesize
       content = embed_images(content, min_path) if extension == "css"
@@ -37,7 +38,7 @@ module SlightAssets
         reduced_content = js_reduce(content)
         reduced_content = content if reduced_content.bytesize > content.bytesize
       end
-      File.open(min_path, "w") { |f| f.write(reduced_content) }
+      File.open(min_path, "w") { |f| f.write(info); f.write(reduced_content) }
       mt = File.mtime(file_path)
       File.utime(mt, mt, min_path)
       [min_path, content]
