@@ -29,7 +29,7 @@ module SlightAssets
       end
       return file_path if compressor.nil?
       content = File.read(file_path)
-      info = content =~ /\A\s*(\/\*!\r?\n.*?\*\/\r?\n)/m ? $1 : ""
+      info = content =~ /\A\s*(\/\*!\s.*?\*\/(?:\r?\n)?)/m ? $1 : ""
       c = compressor.compress(content)
       content = c if c.bytesize < content.bytesize
       content = embed_images(content, min_path) if extension == "css"
