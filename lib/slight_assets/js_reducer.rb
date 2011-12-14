@@ -55,31 +55,15 @@ module SlightAssets
         def str_as_utf8(str)
           str.as_utf8
         end
-      rescue LoadError
+      rescue LoadError => e
+        STDERR.puts "WARN: #{e.message}"
         def str_as_utf8(str)
-          a = str.is_a?(Array) ? str : str.scan(/./mu)
-          class << a
-            def index(chars, start)
-              return nil if start >= size
-              i, s, cs = start - 1, size, chars.size
-              while (i+=1) < s
-                next if self[i] != chars[0]
-                return i if cs == 1
-                j = 0
-                while (j+=1) < cs && i + j < s
-                  break if self[i+j] != chars[j]
-                  return i if j + 1 == cs
-                end
-              end
-            end
-          end
-          a
         end
       end
     else
       def str_as_utf8(str)
         str
-      end  
+      end
     end
   end
 end
